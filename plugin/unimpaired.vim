@@ -236,11 +236,21 @@ function! s:BlankDownSelection(count) abort
   execute 'normal ' . visualLine . 'GV' . cursorLine . 'G' . cursorCol . '|'
 endfunction
 
-nnoremap <silent> <Plug>unimpairedBlankUp   :<C-U>call <SID>BlankUp(v:count1)<CR>
-nnoremap <silent> <Plug>unimpairedBlankDown :<C-U>call <SID>BlankDown(v:count1)<CR>
+function! s:BlankAround(count) abort
+  if mode() ==# "V"
+    call s:BlankUpSelection(a:count)
+    call s:BlankDownSelection(a:count)
+  elseif mode() ==# "n"
+    call s:BlankUp(a:count)
+    call s:BlankDown(a:count)
+  endif
+endfunction
 
-xnoremap <silent> <Plug>unimpairedBlankUpSelection   <Cmd>call  <SID>BlankUpSelection(v:count1)<CR>
-xnoremap <silent> <Plug>unimpairedBlankDownSelection <Cmd>call  <SID>BlankDownSelection(v:count1)<CR>
+nnoremap <silent> <Plug>unimpairedBlankUp            <Cmd>call <SID>BlankUp(v:count1)<CR>
+nnoremap <silent> <Plug>unimpairedBlankDown          <Cmd>call <SID>BlankDown(v:count1)<CR>
+xnoremap <silent> <Plug>unimpairedBlankUpSelection   <Cmd>call <SID>BlankUpSelection(v:count1)<CR>
+xnoremap <silent> <Plug>unimpairedBlankDownSelection <Cmd>call <SID>BlankDownSelection(v:count1)<CR>
+noremap  <silent> <Plug>unimpairedBlankAround        <Cmd>call <SID>BlankAround(v:count1)<CR>
 
 call s:map('n', '[<Space>', '<Plug>unimpairedBlankUp')
 call s:map('n', ']<Space>', '<Plug>unimpairedBlankDown')

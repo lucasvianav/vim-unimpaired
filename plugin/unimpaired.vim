@@ -198,11 +198,54 @@ function! s:BlankDown() abort
   return cmd
 endfunction
 
+function! s:BlankUpSelection() abort
+  if mode() != "V"
+    return ''
+  endif
+
+  " saves selection positions
+  let cursorCol = getpos('.')[2]
+  let cursorLine = line(".")+v:count1
+  let visualLine = line("v")+v:count1
+
+  let higher_line = min([line("."), line("v")])
+  exec higher_line . 'put!=repeat(nr2char(10), v:count1)'
+
+  " makes sure it's in normal mode
+  normal \<Esc>
+  " restores selection
+  execute 'normal ' . visualLine . 'GV' . cursorLine . 'G' . cursorCol . '|'
+endfunction
+
+function! s:BlankDownSelection() abort
+  if mode() != "V"
+    return ''
+  endif
+
+  " saves selection positions
+  let cursorCol = getpos('.')[2]
+  let cursorLine = line(".")
+  let visualLine = line("v")
+
+  let lower_line = max([cursorLine, visualLine])
+  exec lower_line . 'put=repeat(nr2char(10), v:count1)'
+
+  " makes sure it's in normal mode
+  normal \<Esc>
+  " restores selection
+  execute 'normal ' . visualLine . 'GV' . cursorLine . 'G' . cursorCol . '|'
+endfunction
+
 nnoremap <silent> <Plug>unimpairedBlankUp   :<C-U>exe <SID>BlankUp()<CR>
 nnoremap <silent> <Plug>unimpairedBlankDown :<C-U>exe <SID>BlankDown()<CR>
 
+xnoremap <silent> <Plug>unimpairedBlankUpSelection   <Cmd>call  <SID>BlankUpSelection()<CR>
+xnoremap <silent> <Plug>unimpairedBlankDownSelection <Cmd>call  <SID>BlankDownSelection()<CR>
+
 call s:map('n', '[<Space>', '<Plug>unimpairedBlankUp')
 call s:map('n', ']<Space>', '<Plug>unimpairedBlankDown')
+call s:map('x', '[<Space>', '<Plug>unimpairedBlankUpSelection')
+call s:map('x', ']<Space>', '<Plug>unimpairedBlankDownSelection')
 
 function! s:ExecMove(cmd) abort
   let old_fdm = &foldmethod

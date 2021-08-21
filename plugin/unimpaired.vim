@@ -182,20 +182,20 @@ endfunction
 
 " Section: Line operations
 
-function! s:BlankUp() abort
-  let cmd = 'put!=repeat(nr2char(10), v:count1)|silent '']+'
+function! s:BlankUp(count) abort
+  put!=repeat(nr2char(10), a:count)
+  ']+1
   if &modifiable
-    let cmd .= '|silent! call repeat#set("\<Plug>unimpairedBlankUp", v:count1)'
+    silent! call repeat#set("\<Plug>unimpairedBlankUp", a:count)
   endif
-  return cmd
 endfunction
 
-function! s:BlankDown() abort
-  let cmd = 'put =repeat(nr2char(10), v:count1)|silent ''[-'
+function! s:BlankDown(count) abort
+  put =repeat(nr2char(10), a:count)
+  '[-1
   if &modifiable
-    let cmd .= '|silent! call repeat#set("\<Plug>unimpairedBlankDown", v:count1)'
+    silent! call repeat#set("\<Plug>unimpairedBlankDown", a:count)
   endif
-  return cmd
 endfunction
 
 function! s:BlankUpSelection(count) abort
@@ -236,8 +236,8 @@ function! s:BlankDownSelection(count) abort
   execute 'normal ' . visualLine . 'GV' . cursorLine . 'G' . cursorCol . '|'
 endfunction
 
-nnoremap <silent> <Plug>unimpairedBlankUp   :<C-U>exe <SID>BlankUp()<CR>
-nnoremap <silent> <Plug>unimpairedBlankDown :<C-U>exe <SID>BlankDown()<CR>
+nnoremap <silent> <Plug>unimpairedBlankUp   :<C-U>call <SID>BlankUp(v:count1)<CR>
+nnoremap <silent> <Plug>unimpairedBlankDown :<C-U>call <SID>BlankDown(v:count1)<CR>
 
 xnoremap <silent> <Plug>unimpairedBlankUpSelection   <Cmd>call  <SID>BlankUpSelection(v:count1)<CR>
 xnoremap <silent> <Plug>unimpairedBlankDownSelection <Cmd>call  <SID>BlankDownSelection(v:count1)<CR>

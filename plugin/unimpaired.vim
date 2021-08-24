@@ -311,6 +311,76 @@ call s:map('n', ']e', '<Plug>unimpairedMoveDown')
 call s:map('x', '[e', '<Plug>unimpairedMoveSelectionUp')
 call s:map('x', ']e', '<Plug>unimpairedMoveSelectionDown')
 
+function s:DuplicateLine(...) abort
+  if a:0 | let s:dupl_dir = a:1 | endif
+  if s:dupl_dir !=# "up" && s:dupl_dir !=# "down" | return | endif
+
+  let up = (s:dupl_dir ==# "up")
+  let cmd = substitute(repeat('copy ' . (up ? '-1' : '+0') . ' | ', v:count1), ' | $', '', '')
+  silent! execute cmd
+
+  silent! call repeat#set("\<Plug>DuplicateLineRepeat", v:count1)
+endfunction
+
+function s:DuplicateSelection(...) abort
+  if a:0 | let s:dupl_dir = a:1 | endif
+  if (s:dupl_dir !=# "up" && s:dupl_dir !=# "down") || mode() !=# "V" | return | endif
+
+  let up = (s:dupl_dir ==# "up")
+
+  let cursorCol   = getpos('.')[2]
+  let cursorLine  = line(".")
+  let visualLine  = line("v")
+
+  let higher_line = min([cursorLine, visualLine])
+  let lower_line  = max([cursorLine, visualLine])
+
+  let range  = higher_line . ',' . lower_line
+  let length = lower_line - higher_line + 1
+
+  let i = 0
+  let count = v:count1
+
+  while i < count
+    " copies up
+    let cmd = range . 'copy -1 | normal ' . higher_line . 'G'
+    silent! execute cmd
+
+    let i += 1
+  endwhile
+
+  " if the direction was not
+  " 'up', fixes the selection
+  if !up
+    " leaves visual mode
+    execute "'<,'>normal \<Esc> "
+
+    " calculates the bottomost selection selection's
+    " position (length*i is the final offset)
+    let newVisualLine = visualLine + length*i
+    let newCursorLine = cursorLine + length*i
+
+    " creates a new selection maintaining the cursor column
+    let cmd = 'normal ' . newVisualLine . 'GV' . newCursorLine . 'G' . cursorCol . '|'
+    execute cmd
+  endif
+
+  silent! call repeat#set("\<Plug>DuplicateSelectionRepeat", v:count1)
+endfunction
+
+nnoremap <silent> <script> <Plug>DuplicateLineAbove  :<C-u>call <SID>DuplicateLine("up")<CR>
+nnoremap <silent> <script> <Plug>DuplicateLineBelow  :<C-u>call <SID>DuplicateLine("down")<CR>
+nnoremap <silent> <script> <Plug>DuplicateLineRepeat :<C-u>call <SID>DuplicateLine()<CR>
+
+xnoremap <silent> <script> <Plug>DuplicateSelectionAbove  <Cmd>call <SID>DuplicateSelection("up")<CR>
+xnoremap <silent> <script> <Plug>DuplicateSelectionBelow  <Cmd>call <SID>DuplicateSelection("down")<CR>
+xnoremap <silent> <script> <Plug>DuplicateSelectionRepeat <Cmd>call <SID>DuplicateSelection()<CR>
+
+call s:map('n', '[d', '<Plug>DuplicateLineAbove')
+call s:map('n', ']d', '<Plug>DuplicateLineBelow')
+call s:map('x', '[d', '<Plug>DuplicateSelectionAbove')
+call s:map('x', ']d', '<Plug>DuplicateSelectionBelow')
+
 " Section: Option toggling
 
 function! s:statusbump() abort

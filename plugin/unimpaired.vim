@@ -353,7 +353,7 @@ function s:DuplicateSelection(...) abort
   " 'up', fixes the selection
   if !up
     " leaves visual mode
-    execute "'<,'>normal \<Esc> "
+    silent! execute "normal \<Esc>"
 
     " calculates the bottomost selection selection's
     " position (length*i is the final offset)
@@ -362,7 +362,7 @@ function s:DuplicateSelection(...) abort
 
     " creates a new selection maintaining the cursor column
     let cmd = 'normal ' . newVisualLine . 'GV' . newCursorLine . 'G' . cursorCol . '|'
-    execute cmd
+    silent! execute cmd
   endif
 
   silent! call repeat#set("\<Plug>DuplicateSelectionRepeat", v:count1)
